@@ -36,22 +36,6 @@ describe('AuthService', () => {
   });
 
   describe('authenticate', () => {
-    it('should auth user not found', async () => {
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      } as any;
-
-      jest.spyOn(authRepository, 'getOneUser').mockResolvedValue(null);
-
-      await service.autheticate('codigo', res);
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        error: 'Usuário não encontrado',
-      });
-    });
-
     it('should auth success', async () => {
       const user = new User({ id: 1, userCode: 'codigo', name: 'Junion' });
       const token = generateAccessToken('codigo');
@@ -70,6 +54,35 @@ describe('AuthService', () => {
         user,
         token,
       });
+    });
+
+    it('should auth user not found', async () => {
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as any;
+
+      jest.spyOn(authRepository, 'getOneUser').mockResolvedValue(null);
+
+      await service.autheticate('codigo', res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        error: 'Usuário não encontrado',
+      });
+    });
+
+    it('should auth error', async () => {
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as any;
+
+      jest.spyOn(authRepository, 'getOneUser').mockRejectedValue(new Error('Internal Error'));
+
+      await service.autheticate('codigo', res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
     });
   });
 });

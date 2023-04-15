@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import { sign, verify } from 'jsonwebtoken';
 import { User } from '../modules/auth/models/user.model';
+import { AuthRepository } from '../modules/auth/repository/auth.repository';
 
-interface AuthenticatedRequest extends Request {
+export interface AuthenticatedRequest<T = any> extends Request<{}, any, T> {
   user: User;
 }
 
@@ -16,10 +17,12 @@ export const Authenticate = (req: AuthenticatedRequest, res: Response, next: Nex
 
   if (token == null) return res.status(401).json({ error: 'Usuário não autorizado' });
 
-  verify(token, process.env.TOKEN_SECRET as string, (err: any, user: User) => {
+  verify(token, process.env.TOKEN_SECRET as string, async (err: any, user: User) => {
     if (err) return res.status(403);
 
-    req.user = user;
+    const authRepository = new AuthRepository();
+
+    req.user = await authRepository.getOneUser(user.userCode);
 
     next();
   });
