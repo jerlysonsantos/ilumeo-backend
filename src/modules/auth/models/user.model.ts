@@ -1,11 +1,11 @@
 export class User {
   id?: number;
-  userCode?: string;
+  user_code?: string;
   name?: string;
 
-  constructor({ id, userCode, name }: User) {
+  constructor({ id, user_code, name }: User) {
     this.id = id;
-    this.userCode = userCode;
+    this.user_code = user_code;
     this.name = name;
   }
 }
