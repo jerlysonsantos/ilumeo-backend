@@ -6,9 +6,7 @@ export interface IContainerProvider {
 export class Container {
   providers: { [key: string]: any } = {};
   public resolve(token: string) {
-    const matchedProvider = Object.keys(this.providers).find(
-      (key: string) => key === token
-    );
+    const matchedProvider = Object.keys(this.providers).find((key: string) => key === token);
 
     if (matchedProvider) {
       return this.providers[matchedProvider];
