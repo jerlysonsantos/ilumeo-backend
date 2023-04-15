@@ -12,7 +12,7 @@ exports.up = (pgm) => {
       onDelete: 'cascade',
     },
     registred_hour: {
-      type: 'integer',
+      type: 'double',
       notNull: true,
     },
     registred_date: {

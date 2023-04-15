@@ -3,6 +3,8 @@ import { Repository } from '@repository';
 import { TimesheetDto } from '../dto/timesheet.dto';
 import { User } from 'src/modules/auth/models/user.model';
 import { Timesheet } from '../models/timesheet.model';
+import { IPaginateOptions } from '../interfaces/timesheet-paginate.interface';
+import { ITimesheet } from '../interfaces/timesheet.interface';
 
 @Injectable('timesheetRepository')
 export class TimesheetRepository extends Repository {
@@ -51,5 +53,39 @@ export class TimesheetRepository extends Repository {
     });
   }
 
-  getTimesheetByUserCode() {}
+  private formatTime(hourFloat: number) {
+    var hour = Math.floor(hourFloat);
+    var minutes = Math.round((hourFloat - hour) * 60);
+
+    var formattedTime = hour + ':' + (minutes < 10 ? '0' : '') + minutes;
+    return formattedTime;
+  }
+
+  getTimesheetByUserId(userId: number, { page, limit }: IPaginateOptions): Promise<ITimesheet[]> {
+    return new Promise((resolve, reject) => {
+      this.connection.query(
+        `SELECT date_trunc('day', registred_date) as date,
+          SUM(CASE WHEN registred_hour_type = false THEN -registred_hour ELSE registred_hour END) as total_hours
+        FROM timesheet t 
+        WHERE user_id = ${userId}
+        GROUP BY date
+        ORDER BY date DESC
+        LIMIT ${limit}
+        OFFSET ${page * limit}
+        `,
+        (error, results) => {
+          if (error) {
+            return reject(error);
+          }
+
+          const items: ITimesheet[] = results.rows.map((row) => ({
+            ...row,
+            total_hours: this.formatTime(row.total_hours),
+          }));
+
+          resolve(items);
+        }
+      );
+    });
+  }
 }

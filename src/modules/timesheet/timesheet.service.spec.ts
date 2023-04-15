@@ -21,6 +21,7 @@ describe('TimesheetService', () => {
     timesheetRepository = {
       registerTime: jest.fn(),
       getLastUserRegister: jest.fn(),
+      getTimesheetByUserId: jest.fn(),
     } as any;
 
     TestProviders.providers([
@@ -105,6 +106,59 @@ describe('TimesheetService', () => {
       expect(res.json).toHaveBeenCalledWith({
         error: 'Internal Error',
       });
+    });
+  });
+
+  describe('get timesheet', () => {
+    it('should get timesheet success', async () => {
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as any;
+
+      const timesheetItems = [{ date: '2023-04-16 00:00:00.000', total_hours: '20:00' }];
+
+      jest.spyOn(timesheetRepository, 'getTimesheetByUserId').mockResolvedValue(timesheetItems);
+
+      await service.getTimesheet({ id: 1 }, { page: 0, limit: 10 }, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        paginateOptions: {
+          page: 0,
+          limit: 10,
+        },
+        items: timesheetItems,
+      });
+    });
+
+    it('should get timesheet not found', async () => {
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as any;
+
+      jest.spyOn(timesheetRepository, 'getTimesheetByUserId').mockResolvedValue([]);
+
+      await service.getTimesheet({ id: 1 }, { page: 0, limit: 10 }, res);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({
+        error: 'Não há dados para exibir',
+      });
+    });
+
+    it('should get timesheet error', async () => {
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as any;
+
+      jest.spyOn(timesheetRepository, 'getTimesheetByUserId').mockRejectedValue([]);
+
+      await service.getTimesheet({ id: 1 }, { page: 0, limit: 10 }, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
     });
   });
 });

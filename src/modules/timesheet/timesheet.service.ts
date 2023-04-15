@@ -3,6 +3,7 @@ import { Inject, Injectable } from '@injection-dependency';
 import { TimesheetDto } from './dto/timesheet.dto';
 import { User } from '../auth/models/user.model';
 import { TimesheetRepository } from './repository/timesheet.repository';
+import { IPaginateOptions } from './interfaces/timesheet-paginate.interface';
 
 @Injectable('timesheetService')
 export class TimesheetService {
@@ -27,5 +28,17 @@ export class TimesheetService {
     }
   }
 
-  getTimesheet(user: User, res: Response) {}
+  async getTimesheet(user: User, paginateOptions: IPaginateOptions, res: Response) {
+    try {
+      const timesheets = await this.timesheetRepository.getTimesheetByUserId(user.id, paginateOptions);
+
+      if (!timesheets.length) {
+        return res.status(404).json({ error: 'Não há dados para exibir' });
+      }
+
+      return res.status(200).json({ paginateOptions, items: timesheets });
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
 }
