@@ -14,7 +14,7 @@ export class TimesheetService {
     try {
       const lastTimesheet = await this.timesheetRepository.getLastUserRegister(user);
 
-      let registredHourType: boolean = false;
+      let registredHourType = false;
 
       if (lastTimesheet) {
         registredHourType = !lastTimesheet.registred_hour_type;
@@ -37,6 +37,20 @@ export class TimesheetService {
       }
 
       return res.status(200).json({ paginateOptions, items: timesheets });
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
+  async getCurrentHour(user: User, res: Response) {
+    try {
+      const timesheet = await this.timesheetRepository.getCurrentHourById(user.id);
+
+      if (!timesheet) {
+        return res.status(200).json({ timesheet: { date: new Date(), total_hours: '00:00' } });
+      }
+
+      return res.status(200).json({ timesheet });
     } catch (error) {
       return res.status(500).json({ error: error.message });
     }

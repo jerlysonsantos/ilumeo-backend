@@ -15,6 +15,10 @@ export class AuthRepository extends Repository {
           return reject(error);
         }
 
+        if (!results.rows.length) {
+          return resolve(null);
+        }
+
         resolve(new User(results.rows[0]));
       });
     });

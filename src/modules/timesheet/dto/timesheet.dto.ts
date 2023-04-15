@@ -1,4 +1,4 @@
-import { IsNumber, IsBoolean, IsDate, IsNotEmpty, IsString } from 'class-validator';
+import { IsNumber, IsNotEmpty, IsString } from 'class-validator';
 
 export class TimesheetDto {
   @IsNotEmpty({ message: 'Hora registrada não pode ser vazio' })

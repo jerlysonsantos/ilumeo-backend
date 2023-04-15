@@ -1,6 +1,6 @@
 import { Controller, Get, Post } from '@routers';
 import { Authenticate, AuthenticatedRequest } from '../../helpers/jwt.helper';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { Inject } from '@injection-dependency';
 import { TimesheetService } from './timesheet.service';
 import { TimesheetDto } from './dto/timesheet.dto';
@@ -30,6 +30,15 @@ export class TimesheetController {
       };
 
       return this.timesheetService.getTimesheet(req.user, paginateOptions, res);
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  }
+
+  @Get('/current', Authenticate)
+  getCurrentHour(req: AuthenticatedRequest, res: Response) {
+    try {
+      return this.timesheetService.getCurrentHour(req.user, res);
     } catch (error) {
       return res.status(500).json({ error: error.message });
     }

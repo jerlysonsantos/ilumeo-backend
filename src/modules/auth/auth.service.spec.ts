@@ -37,7 +37,7 @@ describe('AuthService', () => {
 
   describe('authenticate', () => {
     it('should auth success', async () => {
-      const user = new User({ id: 1, userCode: 'codigo', name: 'Junion' });
+      const user = new User({ id: 1, user_code: 'codigo', name: 'Junion' });
       const token = generateAccessToken('codigo');
 
       const res = {

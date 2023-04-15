@@ -54,6 +54,10 @@ export class TimesheetRepository extends Repository {
   }
 
   private formatTime(hourFloat: number) {
+    if (hourFloat < 0) {
+      return '00:00';
+    }
+
     var hour = Math.floor(hourFloat);
     var minutes = Math.round((hourFloat - hour) * 60);
 
@@ -84,6 +88,39 @@ export class TimesheetRepository extends Repository {
           }));
 
           resolve(items);
+        }
+      );
+    });
+  }
+
+  getCurrentHourById(userId: number): Promise<ITimesheet> {
+    return new Promise((resolve, reject) => {
+      this.connection.query(
+        `SELECT date_trunc('day', registred_date) as date,
+          SUM(CASE WHEN registred_hour_type = false THEN -registred_hour ELSE registred_hour END) as total_hours
+        FROM timesheet t 
+        WHERE 
+          user_id = ${userId} 
+          AND registred_date <= Now()
+        GROUP BY date
+        ORDER BY date DESC
+        LIMIT 1
+        `,
+        (error, results) => {
+          if (error) {
+            return reject(error);
+          }
+
+          if (!results.rows.length) {
+            return resolve(null);
+          }
+
+          const timesheet = {
+            ...results.rows[0],
+            total_hours: this.formatTime(results.rows[0].total_hours),
+          };
+
+          resolve(timesheet);
         }
       );
     });

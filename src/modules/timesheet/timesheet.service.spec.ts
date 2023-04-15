@@ -22,6 +22,7 @@ describe('TimesheetService', () => {
       registerTime: jest.fn(),
       getLastUserRegister: jest.fn(),
       getTimesheetByUserId: jest.fn(),
+      getCurrentHourById: jest.fn(),
     } as any;
 
     TestProviders.providers([
@@ -157,6 +158,57 @@ describe('TimesheetService', () => {
       jest.spyOn(timesheetRepository, 'getTimesheetByUserId').mockRejectedValue([]);
 
       await service.getTimesheet({ id: 1 }, { page: 0, limit: 10 }, res);
+
+      expect(res.status).toHaveBeenCalledWith(500);
+    });
+  });
+
+  describe('get current hour', () => {
+    it('should get current hour success', async () => {
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as any;
+
+      const timesheet = { date: '2023-04-16 00:00:00.000', total_hours: '20:00' };
+
+      jest.spyOn(timesheetRepository, 'getCurrentHourById').mockResolvedValue(timesheet);
+
+      await service.getCurrentHour({ id: 1 }, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        timesheet,
+      });
+    });
+
+    it('should get current hour not found', async () => {
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as any;
+
+      const timesheet = { date: new Date(), total_hours: '00:00' };
+
+      jest.spyOn(timesheetRepository, 'getCurrentHourById').mockResolvedValue(null);
+
+      await service.getCurrentHour({ id: 1 }, res);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        timesheet,
+      });
+    });
+
+    it('should get current hour error', async () => {
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      } as any;
+
+      jest.spyOn(timesheetRepository, 'getCurrentHourById').mockRejectedValue({});
+
+      await service.getCurrentHour({ id: 1 }, res);
 
       expect(res.status).toHaveBeenCalledWith(500);
     });

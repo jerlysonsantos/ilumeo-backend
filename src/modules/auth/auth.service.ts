@@ -1,4 +1,4 @@
-import { Response, Request } from 'express';
+import { Response } from 'express';
 
 import { Injectable, Inject } from '@injection-dependency';
 
