@@ -2,13 +2,16 @@ import 'reflect-metadata';
 import 'module-alias/register';
 
 import bodyParser from 'body-parser';
+import cors from 'cors';
 import App from './app';
-import { GenericController } from './modules/generic/generic.controller';
+
+import { AuthController } from './modules/auth/auth.controller';
+import { TimesheetController } from './modules/timesheet/timesheet.controller';
 
 const app = new App({
-  port: 3000,
-  controllers: [GenericController],
-  middleWares: [bodyParser.json(), bodyParser.urlencoded({ extended: true })],
+  port: Number(process.env.PORT) || 3000,
+  controllers: [AuthController, TimesheetController],
+  middleWares: [bodyParser.json(), bodyParser.urlencoded({ extended: true }), cors()],
 });
 
 app.listen();
