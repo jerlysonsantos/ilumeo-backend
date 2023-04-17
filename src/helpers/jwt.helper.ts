@@ -20,7 +20,7 @@ export const Authenticate = (req: AuthenticatedRequest, res: Response, next: Nex
   }
 
   verify(token, process.env.TOKEN_SECRET as string, async (err: any, user: User) => {
-    if (err) return res.status(403);
+    if (err) return res.status(401).json({ message: 'Token Inválido' });
 
     const authRepository = new AuthRepository();
 

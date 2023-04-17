@@ -32,10 +32,6 @@ export class TimesheetService {
     try {
       const timesheets = await this.timesheetRepository.getTimesheetByUserId(user.id, paginateOptions);
 
-      if (!timesheets.length) {
-        return res.status(404).json({ error: 'Não há dados para exibir' });
-      }
-
       return res.status(200).json({ paginateOptions, items: timesheets });
     } catch (error) {
       return res.status(500).json({ error: error.message });
@@ -45,12 +41,13 @@ export class TimesheetService {
   async getCurrentHour(user: User, res: Response) {
     try {
       const timesheet = await this.timesheetRepository.getCurrentHourById(user.id);
+      const lastRegisterType = await this.timesheetRepository.getLastRegisterType(user.id);
 
       if (!timesheet) {
-        return res.status(200).json({ timesheet: { date: new Date(), total_hours: '00:00' } });
+        return res.status(200).json({ total_hours: '0h 00m', last_register_type: null });
       }
 
-      return res.status(200).json({ timesheet });
+      return res.status(200).json({ ...timesheet, last_register_type: lastRegisterType });
     } catch (error) {
       return res.status(500).json({ error: error.message });
     }

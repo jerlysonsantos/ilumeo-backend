@@ -20,7 +20,7 @@ export const ValidateBody = (dtoClass: new () => any) => {
 
     validate(validationDtoClass).then((errors) => {
       if (errors.length > 0) {
-        return res.status(500).json({ errors: validationErroHandling(errors) });
+        return res.status(400).json({ errors: validationErroHandling(errors) });
       } else {
         req.body = validationDtoClass;
         next();

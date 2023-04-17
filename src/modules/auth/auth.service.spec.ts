@@ -1,5 +1,5 @@
 import { AuthService } from './auth.service';
-import { Request } from 'express';
+
 import { AuthRepository } from './repository/auth.repository';
 import TestProviders from '@jest-providers';
 import { User } from './models/user.model';
