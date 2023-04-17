@@ -8,6 +8,7 @@
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",
     "start": "ts-node-dev src/index.ts",
+    "build": "tsc",
     "seed": "ts-node src/database/seed/seed.ts",
     "migrate": "node-pg-migrate -f ./src/config/database.ts -m ./src/database/migrations"
   },

@@ -10,4 +10,4 @@ COPY . .
 
 RUN chown -R root:root /app
 
-CMD [ "npm", "start" ]
+CMD [ "sh", "./start.sh" ]
