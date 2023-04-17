@@ -67,7 +67,7 @@ export class TimesheetRepository extends Repository {
 
   private formatDate(date) {
     var day = date.getDate();
-    var month = date.getMonth() + 1; // months are zero-indexed, so add 1
+    var month = date.getMonth() + 1;
     var year = date.getFullYear();
     return String(day).padStart(2, '0') + '/' + String(month).padStart(2, '0') + '/' + year;
   }
