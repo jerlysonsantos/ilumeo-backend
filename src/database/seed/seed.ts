@@ -13,19 +13,14 @@ const connection = new Client({
   database: process.env.DATABASE_NAME,
 });
 
-try {
-  connection.connect();
+connection.connect();
 
-  connection.query(seedQuery, (err) => {
-    if (err) {
-      throw err;
-    }
-
-    console.log('SQL seed completed!');
+connection.query(seedQuery, (err) => {
+  if (err) {
+    console.log('SQL seed error!');
     connection.end();
-  });
-} catch (error) {
-  connection.end();
+  }
 
-  console.error(error.message);
-}
+  console.log('SQL seed completed!');
+  connection.end();
+});
