@@ -55,14 +55,21 @@ export class TimesheetRepository extends Repository {
 
   private formatTime(hourFloat: number) {
     if (hourFloat < 0) {
-      return '00:00';
+      return '0h 00m';
     }
 
     var hour = Math.floor(hourFloat);
     var minutes = Math.round((hourFloat - hour) * 60);
 
-    var formattedTime = hour + ':' + (minutes < 10 ? '0' : '') + minutes;
+    var formattedTime = hour + 'h ' + String(minutes).padStart(2, '0') + 'm';
     return formattedTime;
+  }
+
+  private formatDate(date) {
+    var day = date.getDate();
+    var month = date.getMonth() + 1; // months are zero-indexed, so add 1
+    var year = date.getFullYear();
+    return String(day).padStart(2, '0') + '/' + String(month).padStart(2, '0') + '/' + year;
   }
 
   getTimesheetByUserId(userId: number, { page, limit }: IPaginateOptions): Promise<ITimesheet[]> {
@@ -71,7 +78,7 @@ export class TimesheetRepository extends Repository {
         `SELECT date_trunc('day', registred_date) as date,
           SUM(CASE WHEN registred_hour_type = false THEN -registred_hour ELSE registred_hour END) as total_hours
         FROM timesheet t 
-        WHERE user_id = ${userId}
+        WHERE user_id = ${userId} AND registred_date < CURRENT_DATE
         GROUP BY date
         ORDER BY date DESC
         LIMIT ${limit}
@@ -83,11 +90,38 @@ export class TimesheetRepository extends Repository {
           }
 
           const items: ITimesheet[] = results.rows.map((row) => ({
-            ...row,
+            date: this.formatDate(row.date),
             total_hours: this.formatTime(row.total_hours),
           }));
 
           resolve(items);
+        }
+      );
+    });
+  }
+
+  getLastRegisterType(userId: number): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      this.connection.query(
+        `SELECT 
+          registred_hour_type
+        FROM timesheet t 
+        WHERE 
+          user_id = ${userId}
+          AND registred_date >= CURRENT_DATE
+        ORDER BY created_at DESC
+        LIMIT 1
+        `,
+        (error, results) => {
+          if (error) {
+            return reject(error);
+          }
+
+          if (!results.rows.length) {
+            return resolve(null);
+          }
+
+          resolve(results.rows[0].registred_hour_type);
         }
       );
     });
@@ -101,7 +135,7 @@ export class TimesheetRepository extends Repository {
         FROM timesheet t 
         WHERE 
           user_id = ${userId} 
-          AND registred_date <= Now()
+          AND registred_date >= CURRENT_DATE
         GROUP BY date
         ORDER BY date DESC
         LIMIT 1
@@ -116,7 +150,6 @@ export class TimesheetRepository extends Repository {
           }
 
           const timesheet = {
-            ...results.rows[0],
             total_hours: this.formatTime(results.rows[0].total_hours),
           };
 
